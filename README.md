@@ -35,6 +35,6 @@ Update: We are including an additional potential task to implement. We have iden
 4. Use the trained model to classify new product reviews as positive or negative.
 
 ## Contributors:
-- Angelo Nardone
+- [Angelo Nardone](https://github.com/Angelido)
 - Matteo Ziboli
 - Riccardo Marcaccio
