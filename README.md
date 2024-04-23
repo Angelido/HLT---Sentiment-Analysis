@@ -36,5 +36,5 @@ Update: We are including an additional potential task to implement. We have iden
 
 ## Contributors:
 - [Angelo Nardone](https://github.com/Angelido)
-- Matteo Ziboli
-- Riccardo Marcaccio
+- [Matteo Ziboli](https://github.com/MatteoZb)
+- [Riccardo Marcaccio](https://github.com/Riccardo369)
