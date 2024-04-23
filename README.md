@@ -1,5 +1,5 @@
 # HLT-Sentiment-Analysis: Master's Degree Exam
-## By Angelo Nardone, Matteo Ziboli e Riccardo Marcaccio
+
 
 <div align="center">
 <img hight="250" width="400" alt="GIF" align="center" src="https://github.com/Angelido/HLT-Sentiment-Analysis/blob/main/Figures/simp.gif">
@@ -15,3 +15,26 @@ So the purpose of our project is to take as input product reviews collected from
 Our idea is to attempt binary classification using only the review titles as input, such as ”Great CD” or ”Batteries died within a year”. Clearly, titles are usually short and impactful phrases. Therefore, we believe that these may be sufficient to effectively operate our classifier. However, we plan to extend this idea by also attempting classification using the entire reviews as input. Using the entire reviews entails processing longer sentences and greater computational effort, but it also provides more information and potentially higher accuracy. At this point, our plan is to compare the results of these two classifiers using various metrics to determine which approach is more effective.
 
 Update: We are including an additional potential task to implement. We have identified a second dataset that again would allow us to input product reviews from Amazon and classify them as positive or negative reviews. In this case, we could evaluate our algorithms on the two different datasets to assess their effectiveness.
+
+## Key Features:
+- Utilizes machine learning and natural language processing techniques.
+- Trains a sentiment analysis model on a dataset of Amazon product reviews.
+- Classifies reviews as positive or negative based on their sentiment.
+- Provides insights into customer sentiment towards Amazon products.
+
+## Technologies Used:
+- Python
+- PyTorch
+- Transformers library (for BERT model)
+- Amazon product review dataset
+
+## Usage:
+1. Preprocess the Amazon product review dataset.
+2. Train the sentiment analysis model on the preprocessed dataset.
+3. Evaluate the model's performance using various metrics.
+4. Use the trained model to classify new product reviews as positive or negative.
+
+## Contributors:
+- Angelo Nardone
+- Matteo Ziboli
+- Riccardo Marcaccio
