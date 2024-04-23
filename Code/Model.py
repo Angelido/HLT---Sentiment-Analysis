@@ -10,6 +10,11 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampl
 import transformers
 from transformers import BertTokenizer, BertModel, BertConfig
 
+
+MAX_LEN=512
+BATCH_SIZE=512
+LEARNING_RATE=0.1 
+
 #Set the device for PyTorch operations based on availability:
 device = torch.device("cuda" if torch.cuda.is_available() 
                       else  "mps" if torch.backends.mps.is_available()
@@ -18,7 +23,6 @@ device = torch.device("cuda" if torch.cuda.is_available()
 
 #Initialize a BERT tokenizer from the 'bert-base-uncased' pre-trained model.
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
 
 class AmazonTitles_Dataset(Dataset):
     """
@@ -85,4 +89,72 @@ class AmazonTitles_Dataset(Dataset):
             'mask': torch.tensor(mask, dtype=torch.long),
             'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
             'targets': torch.tensor(self.targets[index], dtype=torch.int)
-        }    
+        }
+    
+
+class BertClass(torch.nn.Module):
+    """
+    Neural network model based on BERT for classification tasks.
+    """
+
+    def __init__(self, dropout=0.1):
+        """
+        Initializes the BertClass model.
+
+        Args:
+        - dropout (float): Dropout probability (default: 0.1).
+        """
+        super(BertClass, self).__init__()
+        # Load the pre-trained BERT model
+        self.transformer = transformers.BertModel.from_pretrained('bert-base-uncased')
+        self.drop1 = torch.nn.Dropout(dropout)
+        self.l1 = torch.nn.Linear(768, 300)
+        self.act1 = torch.nn.Tanh()
+        self.drop2 = torch.nn.Dropout(dropout)
+        self.l2 = torch.nn.Linear(300, 100)
+        self.act2 = torch.nn.Tanh()
+        self.drop3 = torch.nn.Dropout(dropout)
+        self.l3 = torch.nn.Linear(100, 1)
+        self.out = torch.nn.Sigmoid()
+
+    def forward(self, ids, mask, token_type_ids):
+        """
+        Defines the forward pass of the model.
+
+        Args:
+        - ids (torch.Tensor): Tensor of input token IDs.
+        - mask (torch.Tensor): Tensor of attention masks.
+        - token_type_ids (torch.Tensor): Tensor of token type IDs.
+
+        Returns:
+        - output (torch.Tensor): Tensor of output probabilities.
+        """
+        # Forward pass through the BERT model
+        output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
+        output_2 = self.drop1(output_1)
+        output_3 = self.drop2(self.act1(self.l1(output_2)))
+        output_4 = self.drop3(self.act2(self.l2(output_3)))
+        output = self.out(self.l3(output_4))
+
+        return output
+
+def loss_fn(outputs, targets):
+    """
+    Computes the binary cross-entropy loss between model outputs and target labels.
+
+    Args:
+    - outputs (torch.Tensor): Tensor containing model outputs.
+    - targets (torch.Tensor): Tensor containing target labels.
+
+    Returns:
+    - loss (torch.Tensor): Binary cross-entropy loss.
+    """
+    return torch.nn.BCELoss()(outputs, targets)
+
+# Instantiate the BertClass model
+model = BertClass()
+model.to(device)
+
+# Define the Adam optimizer with specified learning rate and model parameters
+optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+
