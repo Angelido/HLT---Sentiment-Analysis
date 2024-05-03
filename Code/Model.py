@@ -10,16 +10,21 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampl
 import transformers
 from transformers import BertTokenizer, BertModel, BertConfig
 
-
-MAX_LEN=512
-BATCH_SIZE=512
-LEARNING_RATE=0.1 
-
 #Set the device for PyTorch operations based on availability:
 device = torch.device("cuda" if torch.cuda.is_available() 
                       else  "mps" if torch.backends.mps.is_available()
                       else "cpu"
                       )
+
+MAX_LEN=512
+TRAIN_BATCH_SIZE=4
+VALID_BATCH_SIZE=4
+LEARNING_RATE=1e-05
+EPOCHS=1
+
+df=pd.read_csv("../Datasets/Cleaned_Datasets/Dataset_1_test.csv")
+new_df=df[["title", "polarity"]].copy()
+new_df = new_df.head(10)
 
 #Initialize a BERT tokenizer from the 'bert-base-uncased' pre-trained model.
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -76,7 +81,7 @@ class AmazonTitles_Dataset(Dataset):
             None,
             add_special_tokens=True,
             max_length=self.max_len,
-            pad_to_max_length=True,
+            padding='max_length',
             return_token_type_ids=True,
             truncation=True
         )
@@ -90,6 +95,31 @@ class AmazonTitles_Dataset(Dataset):
             'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
             'targets': torch.tensor(self.targets[index], dtype=torch.int)
         }
+        
+train_size=0.8
+train_dataset=new_df.sample(frac=train_size, random_state=200)
+test_dataset=new_df.drop(train_dataset.index).reset_index(drop=True)
+train_dataset = train_dataset.reset_index(drop=True)
+
+print("FULL Dataset: {}".format(new_df.shape))
+print("TRAIN Dataset: {}".format(train_dataset.shape))
+print("TEST Dataset: {}".format(test_dataset.shape))
+
+training_set = AmazonTitles_Dataset(train_dataset, tokenizer, MAX_LEN)
+testing_set = AmazonTitles_Dataset(test_dataset, tokenizer, MAX_LEN)
+
+train_params = {'batch_size': TRAIN_BATCH_SIZE,
+                'shuffle': True,
+                'num_workers': 0
+                }
+
+test_params = {'batch_size': VALID_BATCH_SIZE,
+                'shuffle': True,
+                'num_workers': 0
+                }
+
+training_loader = DataLoader(training_set, **train_params)
+testing_loader = DataLoader(testing_set, **test_params)
     
 
 class BertClass(torch.nn.Module):
@@ -115,7 +145,6 @@ class BertClass(torch.nn.Module):
         self.act2 = torch.nn.Tanh()
         self.drop3 = torch.nn.Dropout(dropout)
         self.l3 = torch.nn.Linear(100, 1)
-        self.out = torch.nn.Sigmoid()
 
     def forward(self, ids, mask, token_type_ids):
         """
@@ -134,9 +163,13 @@ class BertClass(torch.nn.Module):
         output_2 = self.drop1(output_1)
         output_3 = self.drop2(self.act1(self.l1(output_2)))
         output_4 = self.drop3(self.act2(self.l2(output_3)))
-        output = self.out(self.l3(output_4))
+        output = self.l3(output_4)
 
         return output
+
+# Instantiate the BertClass model
+model = BertClass()
+model.to(device)
 
 def loss_fn(outputs, targets):
     """
@@ -149,12 +182,32 @@ def loss_fn(outputs, targets):
     Returns:
     - loss (torch.Tensor): Binary cross-entropy loss.
     """
-    return torch.nn.BCELoss()(outputs, targets)
-
-# Instantiate the BertClass model
-model = BertClass()
-model.to(device)
+    return torch.nn.BCEWithLogitLoss()(outputs, targets)
 
 # Define the Adam optimizer with specified learning rate and model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+
+def train(epoch):
+    model.train()
+    for _,data in enumerate(training_loader, 0):
+        ids = data['ids'].to(device, dtype = torch.long)
+        mask = data['mask'].to(device, dtype = torch.long)
+        token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
+        targets = data['targets'].to(device, dtype = torch.float)
+
+        outputs = model(ids, mask, token_type_ids)
+        
+        #targets = torch.unsqueeze(targets, dim=1)
+
+        optimizer.zero_grad()
+        loss = loss_fn(outputs, targets)
+        if _%5000==0:
+            print(f'Epoch: {epoch}, Loss:  {loss.item()}')
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+for epoch in range(EPOCHS):
+    train(epoch)
 
