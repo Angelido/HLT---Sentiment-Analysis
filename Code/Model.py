@@ -20,7 +20,7 @@ MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=1
+EPOCHS=10
 
 # Load the CSV data
 df=pd.read_csv("../Datasets/Cleaned_Datasets/Dataset_1_test.csv")
