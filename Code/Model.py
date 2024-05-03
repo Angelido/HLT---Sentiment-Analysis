@@ -56,7 +56,7 @@ class AmazonTitles_Dataset(Dataset):
         self.data=dataframe
         self.titles=dataframe.title
         self.targets=self.data.polarity
-        self.max.len=max_len
+        self.max_len=max_len
     
     def __len__(self):
         """
@@ -165,7 +165,7 @@ class BertClass(torch.nn.Module):
         - output (torch.Tensor): Tensor of output probabilities.
         """
         # Forward pass through the BERT model
-        output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
+        _, output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
         output_2 = self.drop1(output_1)
         output_3 = self.drop2(self.act1(self.l1(output_2)))
         output_4 = self.drop3(self.act2(self.l2(output_3)))
@@ -188,7 +188,7 @@ def loss_fn(outputs, targets):
     Returns:
     - loss (torch.Tensor): Binary cross-entropy with Logit Loss.
     """
-    return torch.nn.BCEWithLogitLoss()(outputs, targets)
+    return torch.nn.BCEWithLogitsLoss()(outputs, targets)
 
 # Define the Adam optimizer with specified learning rate and model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
