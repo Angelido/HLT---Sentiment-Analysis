@@ -22,7 +22,10 @@ VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
 EPOCHS=1
 
+# Load the CSV data
 df=pd.read_csv("../Datasets/Cleaned_Datasets/Dataset_1_test.csv")
+
+# Select relevant columns and limit data for testing purposes
 new_df=df[["title", "polarity"]].copy()
 new_df = new_df.head(10)
 
@@ -105,9 +108,11 @@ print("FULL Dataset: {}".format(new_df.shape))
 print("TRAIN Dataset: {}".format(train_dataset.shape))
 print("TEST Dataset: {}".format(test_dataset.shape))
 
+# Create custom Dataset objects for training and testing
 training_set = AmazonTitles_Dataset(train_dataset, tokenizer, MAX_LEN)
 testing_set = AmazonTitles_Dataset(test_dataset, tokenizer, MAX_LEN)
 
+# Define parameters for DataLoaders
 train_params = {'batch_size': TRAIN_BATCH_SIZE,
                 'shuffle': True,
                 'num_workers': 0
@@ -118,6 +123,7 @@ test_params = {'batch_size': VALID_BATCH_SIZE,
                 'num_workers': 0
                 }
 
+# Create DataLoaders for training and testing
 training_loader = DataLoader(training_set, **train_params)
 testing_loader = DataLoader(testing_set, **test_params)
     
@@ -180,7 +186,7 @@ def loss_fn(outputs, targets):
     - targets (torch.Tensor): Tensor containing target labels.
 
     Returns:
-    - loss (torch.Tensor): Binary cross-entropy loss.
+    - loss (torch.Tensor): Binary cross-entropy with Logit Loss.
     """
     return torch.nn.BCEWithLogitLoss()(outputs, targets)
 
@@ -188,25 +194,45 @@ def loss_fn(outputs, targets):
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
 def train(epoch):
-    model.train()
-    for _,data in enumerate(training_loader, 0):
+    """
+    Trains the model for one epoch.
+
+    Args:
+        epoch (int): Current training epoch.
+    """
+    model.train()  # Set the model to training mode
+    
+    total_loss=0.0
+
+    for _, data in enumerate(training_loader, 0):
+        # Access data elements from the batch
         ids = data['ids'].to(device, dtype = torch.long)
         mask = data['mask'].to(device, dtype = torch.long)
         token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
         targets = data['targets'].to(device, dtype = torch.float)
-
+        targets = torch.unsqueeze(targets, dim=1)
+        
+        # Forward pass through the model
         outputs = model(ids, mask, token_type_ids)
-        
-        #targets = torch.unsqueeze(targets, dim=1)
 
-        optimizer.zero_grad()
+        # Calculate and print loss every 5000 steps
+        #optimizer.zero_grad()
         loss = loss_fn(outputs, targets)
-        if _%5000==0:
-            print(f'Epoch: {epoch}, Loss:  {loss.item()}')
         
+        # Accumulate the total loss
+        total_loss += loss.item()
+
+        # Backpropagation and optimizer step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        
+    # Calculate the average loss for the epoch
+    avg_loss = total_loss / len(training_loader)
+
+    # Print the average loss for the epoch
+    print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
+
         
 for epoch in range(EPOCHS):
     train(epoch)
