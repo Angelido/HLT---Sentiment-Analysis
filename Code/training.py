@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn.model_selection import train_test_split
 
 import torch
 import torch.nn as nn
@@ -36,19 +37,28 @@ num_polarity_2 = (df['polarity'] == 2).sum()
 sample_polarity_1 = df[df['polarity'] == 0].sample(n=10)
 sample_polarity_2 = df[df['polarity'] == 1].sample(n=10)
 df = pd.concat([sample_polarity_1, sample_polarity_2])
+df = df.reset_index(drop=True)
 
-#Divide test and train set
-train_size=0.8
-train_dataset=df.sample(frac=train_size, random_state=200)
-test_dataset=df.drop(train_dataset.index).reset_index(drop=True)
-train_dataset = train_dataset.reset_index(drop=True)
+#Divide test train and validation set
+train_data, test_data = train_test_split(df, test_size=0.2, random_state=200)
+train_data, val_data = train_test_split(train_data, test_size=0.1, random_state=200)
+
+#Reindex the dataframes
+train_data = train_data.reset_index(drop=True)
+test_data = test_data.reset_index(drop=True)
+val_data = val_data.reset_index(drop=True)
+
+
+print("Training set size:", len(train_data))
+print("Valutation set size:", len(val_data))
+print("Test set size:", len(test_data))
 
 #Initialize a BERT tokenizer from the 'bert-base-cased' pre-trained model.
 tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
 
 #Instantiate train and test datasets from Amazon class
-training_set = AmazonTitles_Dataset(train_dataset, tokenizer, MAX_LEN)
-testing_set = AmazonTitles_Dataset(test_dataset, tokenizer, MAX_LEN)
+training_set = AmazonTitles_Dataset(train_data, tokenizer, MAX_LEN)
+testing_set = AmazonTitles_Dataset(test_data, tokenizer, MAX_LEN)
 
 # Configuration parameters for the DataLoader during train and test
 train_params = {
