@@ -54,61 +54,34 @@ class AmazonTitles_Dataset(Dataset):
         
 
 class BertClass(torch.nn.Module):
-    """
-    A PyTorch module defining a neural network architecture for sentiment analysis using BERT.
-    """
 
     def __init__(self, dropout=0.1):
-        """
-        Initializes the BertClass.
-
-        Args:
-            dropout (float): Dropout probability.
-        """
         super(BertClass, self).__init__()
         self.transformer = transformers.BertModel.from_pretrained('bert-base-cased')
-        self.drop1 = torch.nn.BatchNorm1d(768)  # Batch normalization layer
-        self.l1 = torch.nn.Linear(768, 300)  # First linear layer
-        self.act1 = torch.nn.ReLU()  # ReLU activation function
-        self.drop2 = torch.nn.Dropout(dropout)  # Dropout layer
-        self.l2 = torch.nn.Linear(300, 100)  # Second linear layer
-        self.act2 = torch.nn.ReLU()  # ReLU activation function
-        self.drop3 = torch.nn.Dropout(dropout)  # Dropout layer
-        self.l3 = torch.nn.Linear(100, 1)  # Output linear layer
-        self.output = torch.nn.Sigmoid()  # Sigmoid activation function
+        self.batch1 = torch.nn.BatchNorm1d(768)
+        self.drop1 = torch.nn.Dropout(dropout)
+        self.l1 = torch.nn.Linear(768, 300)
+        self.act1=torch.nn.ReLU()
+        self.batch2 = torch.nn.BatchNorm1d(300)
+        self.drop2 = torch.nn.Dropout(dropout)
+        self.l2 = torch.nn.Linear(300, 100)
+        self.act2=torch.nn.ReLU()
+        self.batch3 = torch.nn.BatchNorm1d(100)
+        self.drop3=torch.nn.Dropout(dropout)
+        self.l3=torch.nn.Linear(100,1)
+        #self.output=torch.nn.Sigmoid()
 
     def forward(self, ids, mask, token_type_ids):
-        """
-        Defines the forward pass of the neural network.
-
-        Args:
-            ids (torch.Tensor): Input token ids.
-            mask (torch.Tensor): Attention mask.
-            token_type_ids (torch.Tensor): Token type ids.
-
-        Returns:
-            torch.Tensor: Model output.
-        """
-        _, output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
-        output_2 = self.drop1(output_1)
-        output_3 = self.drop2(self.act1(self.l1(output_2)))
-        output_4 = self.drop3(self.act2(self.l2(output_3)))
-        output = self.output(self.l3(output_4))
+        _, output_1=self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
+        output_2=self.drop1(self.batch1(output_1))
+        output_3=self.drop2(self.batch2(self.act1(self.l1(output_2))))
+        output_4=self.drop3(self.batch3(self.act2(self.l2(output_3))))
+        output=self.l3(output_4)
+        #output=self.output(self.l3(output_4))
 
         return output
 
     def loss_fn(self, outputs, targets):
-        """
-        Computes the loss between model predictions and target labels.
-
-        Args:
-            outputs (torch.Tensor): Model predictions.
-            targets (torch.Tensor): Target labels.
-
-        Returns:
-            torch.Tensor: Loss value.
-        """
         return torch.nn.BCEWithLogitsLoss()(outputs, targets)
-
 
 

@@ -74,7 +74,8 @@ model.to(device)
 #Define the optimizer for the model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
-def train(epoch):
+#Train loop
+for epoch in range(EPOCHS):
     model.train()
     total_loss=0.0
     for data in training_loader:
@@ -101,6 +102,3 @@ def train(epoch):
 
     #Print the average loss for the epoch
     print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
-    
-for epoch in range(EPOCHS):
-    train(epoch)
