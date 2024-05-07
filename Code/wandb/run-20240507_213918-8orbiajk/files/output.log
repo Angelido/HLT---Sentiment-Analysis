@@ -1,0 +1,30 @@
+Training set size: 14
+Valutation set size: 2
+Test set size: 4
+Epoch: 0, Average Loss: 0.709151566028595
+Epoch: 1, Average Loss: 0.7166962027549744
+Epoch: 2, Average Loss: 0.7198833227157593
+Epoch: 3, Average Loss: 0.6927838325500488
+Epoch: 4, Average Loss: 0.6840958446264267
+Epoch: 5, Average Loss: 0.6841750741004944
+Epoch: 6, Average Loss: 0.6801693439483643
+Epoch: 7, Average Loss: 0.693372905254364
+Epoch: 8, Average Loss: 0.7011816948652267
+Epoch: 9, Average Loss: 0.685126930475235
+Epoch: 10, Average Loss: 0.6733226329088211
+Epoch: 11, Average Loss: 0.6801038533449173
+Epoch: 12, Average Loss: 0.6727579981088638
+Epoch: 13, Average Loss: 0.6676217615604401
+Epoch: 14, Average Loss: 0.6574638336896896
+Epoch: 15, Average Loss: 0.6656308621168137
+Epoch: 16, Average Loss: 0.7016871124505997
+Epoch: 17, Average Loss: 0.7045988291501999
+Epoch: 18, Average Loss: 0.6776305437088013
+Epoch: 19, Average Loss: 0.621270164847374
+Accuracy Score = 0.75
+F1 Score (Micro) = 0.75
+F1 Score (Macro) = 0.42857142857142855
+[[1.0], [0.0], [0.0], [0.0]] [[False]
+ [False]
+ [False]
+ [False]]

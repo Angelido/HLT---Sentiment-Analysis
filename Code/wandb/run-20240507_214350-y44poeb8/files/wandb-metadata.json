@@ -1,0 +1,37 @@
+{
+    "os": "macOS-14.4.1-arm64-arm-64bit",
+    "python": "3.11.3",
+    "heartbeatAt": "2024-05-07T19:43:51.528160",
+    "startedAt": "2024-05-07T19:43:50.893082",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/angelo/Desktop/Python/HLT-Sentiment-Analysis/Code/training.py",
+    "codePathLocal": "training.py",
+    "codePath": "Code/training.py",
+    "git": {
+        "remote": "git@github.com:Angelido/HLT-Sentiment-Analysis.git",
+        "commit": "8ad7dfaa8b7d48f014d1ae4db78064fcc5941461"
+    },
+    "email": "a.nardone5@studenti.unipi.it",
+    "root": "/Users/angelo/Desktop/Python/HLT-Sentiment-Analysis",
+    "host": "MBP-di-Angelo.station",
+    "username": "angelo",
+    "executable": "/usr/local/bin/python3",
+    "cpu_count": 10,
+    "cpu_count_logical": 10,
+    "disk": {
+        "/": {
+            "total": 460.4317207336426,
+            "used": 9.541603088378906
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 16.0
+    }
+}

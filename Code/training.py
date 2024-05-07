@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+from collections import defaultdict
 
 import torch
 import torch.nn as nn
@@ -12,6 +13,8 @@ import transformers
 from transformers import BertTokenizer, BertModel, BertConfig
 
 from Model import BertClass, AmazonTitles_Dataset
+
+import wandb
 
 #Setting up the device for GPU usage
 device = torch.device("cuda" if torch.cuda.is_available() 
@@ -25,6 +28,21 @@ TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
 EPOCHS=20
+
+#Start a new wandb run to track this script
+wandb.init(
+    #Set the wandb project where this run will be logged
+    project="test",
+
+    # track hyperparameters and run metadata
+    config={
+    "max_len": 512,
+    "train_batch_size": 4,
+    "valid_batch_size": 4,
+    "learning_rate": 1e-05,
+    "epochs": 20
+    }
+)
 
 #Load the dataset
 df = pd.read_csv("../Final_Datasets/Dataset_1_test.csv")
@@ -84,6 +102,9 @@ model.to(device)
 #Define the optimizer for the model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
+train_loss=[]
+tr_results = defaultdict(list)
+
 #Train loop
 for epoch in range(EPOCHS):
     model.train()
@@ -109,6 +130,37 @@ for epoch in range(EPOCHS):
 
     #Calculate the average loss for the epoch
     avg_loss = total_loss / len(training_loader)
-
+    train_loss.append(avg_loss)
+    
     #Print the average loss for the epoch
     print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
+    tr_results["epoch"]=epoch
+    tr_results["train_loss"]=avg_loss
+    wandb.log(tr_results)
+    
+def validation(epoch):
+    model.eval()
+    fin_targets=[]
+    fin_outputs=[]
+    with torch.no_grad():
+        for data in testing_loader:
+            ids = data['ids'].to(device, dtype = torch.long)
+            mask = data['mask'].to(device, dtype = torch.long)
+            token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
+            targets = data['targets'].to(device, dtype = torch.float)
+            targets = torch.unsqueeze(targets, dim=1)
+            outputs = model(ids, mask, token_type_ids)
+            fin_targets.extend(targets.cpu().detach().numpy().tolist())
+            fin_outputs.extend(outputs.cpu().detach().numpy().tolist())
+    return fin_outputs, fin_targets
+
+outputs, targets = validation(epoch)
+outputs = np.array(outputs) >= 0.5
+accuracy = metrics.accuracy_score(targets, outputs)
+f1_score_micro = metrics.f1_score(targets, outputs, average='micro')
+f1_score_macro = metrics.f1_score(targets, outputs, average='macro')
+print(f"Accuracy Score = {accuracy}")
+print(f"F1 Score (Micro) = {f1_score_micro}")
+print(f"F1 Score (Macro) = {f1_score_macro}")
+
+print(targets, outputs)
