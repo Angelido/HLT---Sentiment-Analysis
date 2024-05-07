@@ -1,8 +1,0 @@
-Training set size: 14
-Valutation set size: 2
-Test set size: 4
-Traceback (most recent call last):
-  File "/Users/angelo/Desktop/Python/HLT-Sentiment-Analysis/Code/training.py", line 131, in <module>
-    loss.append(avg_loss)
-    ^^^^^^^^^^^
-AttributeError: 'Tensor' object has no attribute 'append'
