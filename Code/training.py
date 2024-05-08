@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from collections import defaultdict
+import wandb
 
 import torch
 import torch.nn as nn
@@ -13,8 +14,6 @@ import transformers
 from transformers import BertTokenizer, BertModel, BertConfig
 
 from Model import BertClass, AmazonTitles_Dataset
-
-import wandb
 
 #Setting up the device for GPU usage
 device = torch.device("cuda" if torch.cuda.is_available() 
