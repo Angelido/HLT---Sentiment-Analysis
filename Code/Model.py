@@ -133,6 +133,8 @@ class BertClass(torch.nn.Module):
             torch.Tensor: Loss value.
         """
         return torch.nn.BCELoss()(outputs, targets)
+    
+    
 
 
 
