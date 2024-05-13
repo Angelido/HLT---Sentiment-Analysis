@@ -45,8 +45,6 @@ wandb.init(
 )
 
 #Load the dataset
-script_directory = os.getcwd()
-print(script_directory)
 df = pd.read_csv("../Final_Datasets/Dataset_1_test.csv")
 #Adjust the labels
 df.polarity=df.polarity-1
@@ -166,3 +164,5 @@ print(f"F1 Score (Micro) = {f1_score_micro}")
 print(f"F1 Score (Macro) = {f1_score_macro}")
 
 print(targets, outputs)
+
+model.plot_loss(train_loss)

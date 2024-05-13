@@ -2,11 +2,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
-import matplotlib as plt
-import wandb
 
 import transformers
 from transformers import BertTokenizer, BertModel, BertConfig
+
+from matplotlib import pyplot as plt
+import wandb
 
 
 
@@ -205,6 +206,50 @@ class BertClass(torch.nn.Module):
             train_accuracies.append(accuracy)
 
         return train_losses, train_accuracies
+    
+    def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
+        """
+        Plot training and validation losses.
+
+        Args:
+            train_losses (list): List of training losses.
+            val_losses (list): List of validation losses (optional).
+            figsize (tuple): Size of the figure.
+            print_every (int): Interval for printing training progress.
+        """
+        epochs = range(1, len(train_losses) + 1)
+        plt.figure(figsize=figsize)
+        plt.plot(epochs, train_losses, label='Train Loss')
+        if val_losses:
+            plt.plot(epochs, val_losses, label='Val Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Training and Validation Losses')
+        plt.legend()
+        plt.xticks(epochs[::print_every])
+        plt.show()
+        
+    def plot_accuracy(self, train_accuracies, val_accuracies=None, figsize=(8,6), print_every=1):
+        """
+        Plot training and validation accuracies.
+
+        Args:
+            train_accuracies (list): List of training accuracies.
+            figsize (tuple): Size of the figure.
+            val_accuracies (list): List of validation accuracies (optional).
+            print_every (int): Interval for printing training progress.
+        """
+        epochs = range(1, len(train_accuracies) + 1)
+        plt.figure(figsize=figsize)
+        plt.plot(epochs, train_accuracies, label='Train Accuracy')
+        if val_accuracies:
+            plt.plot(epochs, val_accuracies, label='Val Accuracy')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.title('Training and Validation Accuracies')
+        plt.legend()
+        plt.xticks(epochs[::print_every])
+        plt.show()
 
 
 
