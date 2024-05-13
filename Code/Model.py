@@ -2,9 +2,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+import matplotlib as plt
+import wandb
 
 import transformers
 from transformers import BertTokenizer, BertModel, BertConfig
+
 
 
 class AmazonTitles_Dataset(Dataset):
@@ -134,7 +137,74 @@ class BertClass(torch.nn.Module):
         """
         return torch.nn.BCELoss()(outputs, targets)
     
-    
+    def save_model(self, path):
+        """
+        Saves the model state to a file.
+
+        Args:
+            path (str): Path to save the model state.
+        """
+        torch.save(self.state_dict(), path)
+        
+    def fit(self, train_loader, optimizer, device, num_epochs, print_every=10):
+        """
+        Trains the model using the specified data loader, optimizer, and device.
+
+        Args:
+            train_loader (DataLoader): DataLoader for training data.
+            optimizer (torch.optim.Optimizer): Optimizer for updating model parameters.
+            device (torch.device): Device to run the model on (e.g., 'cpu' or 'cuda').
+            num_epochs (int): Number of epochs for training.
+            print_every (int): Interval for printing training progress.
+
+        Returns:
+            list, list: Training losses, training accuracies.
+        """
+        train_losses = []
+        train_accuracies = []
+
+        self.to(device)
+        self.train()
+
+        for epoch in range(num_epochs):
+            total_loss = 0.0
+            correct_predictions = 0
+            total_predictions = 0
+            
+            for batch_idx, data in enumerate(train_loader):
+                ids = data['ids'].to(device, dtype=torch.long)
+                mask = data['mask'].to(device, dtype=torch.long)
+                token_type_ids = data['token_type_ids'].to(device, dtype=torch.long)
+                targets = data['targets'].to(device, dtype=torch.float)
+                targets = torch.unsqueeze(targets, dim=1)
+
+                optimizer.zero_grad()
+
+                outputs = self(ids, mask, token_type_ids)
+                loss = self.loss_fn(outputs, targets)
+                loss.backward()
+                optimizer.step()
+
+                total_loss += loss.item()
+
+                # Compute accuracies
+                predictions = (outputs > 0.5).float()
+                correct_predictions += (predictions == targets).sum().item()
+                total_predictions += targets.size(0)
+
+                if (batch_idx + 1) % print_every == 0:
+                    avg_loss = total_loss / print_every
+                    accuracy = correct_predictions / total_predictions
+                    print(f"Epoch [{epoch+1}/{num_epochs}], Batch [{batch_idx+1}/{len(train_loader)}], Avg. Loss: {avg_loss:.4f}, Accuracy: {accuracy:.4f}")
+                    wandb.log({"epoch": epoch, "batch": batch_idx, "train_loss": avg_loss, "train_accuracy": accuracy})
+                    total_loss = 0.0  # Reset total loss for next print interval
+                    correct_predictions = 0
+                    total_predictions = 0
+
+            train_losses.append(avg_loss)
+            train_accuracies.append(accuracy)
+
+        return train_losses, train_accuracies
 
 
 

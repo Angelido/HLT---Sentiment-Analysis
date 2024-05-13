@@ -4,6 +4,7 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from collections import defaultdict
 import wandb
+import os
 
 import torch
 import torch.nn as nn
@@ -44,6 +45,8 @@ wandb.init(
 )
 
 #Load the dataset
+script_directory = os.getcwd()
+print(script_directory)
 df = pd.read_csv("../Final_Datasets/Dataset_1_test.csv")
 #Adjust the labels
 df.polarity=df.polarity-1
