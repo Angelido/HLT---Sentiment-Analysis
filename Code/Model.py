@@ -7,7 +7,8 @@ import transformers
 from matplotlib import pyplot as plt
 import wandb
 import pandas as pd
-import numpy as np
+import numpy as pd
+from collections import defaultdict
 
 
 
@@ -154,9 +155,12 @@ class BertClass(torch.nn.Module):
         Returns:
             list, list: Training losses, training accuracies.
         """
+        
         # Vectors for loss and accuracy
         train_losses = []
         train_accuracies = []
+        
+        tr_results = defaultdict(list)
 
         for epoch in range(num_epochs):
             
@@ -208,6 +212,10 @@ class BertClass(torch.nn.Module):
             print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
             train_losses.append(avg_loss)
             train_accuracies.append(accuracy)
+            tr_results["epoch"]=epoch
+            tr_results["train_loss"]=avg_loss
+            tr_results["train_accuracy"]=accuracy
+            wandb.log(tr_results)
 
         return train_losses, train_accuracies
     

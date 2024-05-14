@@ -29,19 +29,19 @@ LEARNING_RATE=1e-05
 EPOCHS=10
 
 #Start a new wandb run to track this script
-# wandb.init(
-#     #Set the wandb project where this run will be logged
-#     project="test",
+wandb.init(
+    #Set the wandb project where this run will be logged
+    project="test",
 
-#     # track hyperparameters and run metadata
-#     config={
-#     "max_len": 512,
-#     "train_batch_size": 4,
-#     "valid_batch_size": 4,
-#     "learning_rate": 1e-05,
-#     "epochs": 20,
-#     }
-# )
+    # track hyperparameters and run metadata
+    config={
+    "max_len": 512,
+    "train_batch_size": 4,
+    "valid_batch_size": 4,
+    "learning_rate": 1e-05,
+    "epochs": 20,
+    }
+)
 
 #Load the dataset
 df = pd.read_csv("Final_Datasets/Dataset_1_test.csv")
@@ -116,8 +116,6 @@ print(val_loss, val_accuracy)
 model.plot_loss(train_loss)
 model.plot_accuracy(train_accuracy)
 
-# train_loss=[]
-# tr_results = defaultdict(list)
 
 #Train loop
 # for epoch in range(EPOCHS):
