@@ -103,7 +103,6 @@ class BertClass(torch.nn.Module):
             torch.nn.Sigmoid()
         )
         
-
     def forward(self, ids, mask, token_type_ids):
         """
         Defines the forward pass of the neural network.
@@ -142,7 +141,7 @@ class BertClass(torch.nn.Module):
         """
         torch.save(self.state_dict(), path)
         
-    def fit(self, train_loader, optimizer, device, num_epochs, print_every=10):
+    def train_model(self, train_loader, optimizer, device, num_epochs):
         """
         Trains the model using the specified data loader, optimizer, and device.
 
@@ -151,34 +150,42 @@ class BertClass(torch.nn.Module):
             optimizer (torch.optim.Optimizer): Optimizer for updating model parameters.
             device (torch.device): Device to run the model on (e.g., 'cpu' or 'cuda').
             num_epochs (int): Number of epochs for training.
-            print_every (int): Interval for printing training progress.
 
         Returns:
             list, list: Training losses, training accuracies.
         """
+        # Vectors for loss and accuracy
         train_losses = []
         train_accuracies = []
 
         self.to(device)
-        self.train()
 
         for epoch in range(num_epochs):
+            
+            self.train()
             total_loss = 0.0
             correct_predictions = 0
             total_predictions = 0
             
-            for batch_idx, data in enumerate(train_loader):
+            for data in train_loader:
+                # Take inputs and targets
                 ids = data['ids'].to(device, dtype=torch.long)
                 mask = data['mask'].to(device, dtype=torch.long)
                 token_type_ids = data['token_type_ids'].to(device, dtype=torch.long)
                 targets = data['targets'].to(device, dtype=torch.float)
                 targets = torch.unsqueeze(targets, dim=1)
 
+                # Zero gradients for every batch!
                 optimizer.zero_grad()
-
+                
+                # Make predictions for this batch
                 outputs = self(ids, mask, token_type_ids)
+                
+                # Compute loss
                 loss = self.loss_fn(outputs, targets)
                 loss.backward()
+                
+                # Adjust learning weights
                 optimizer.step()
 
                 total_loss += loss.item()
@@ -188,15 +195,9 @@ class BertClass(torch.nn.Module):
                 correct_predictions += (predictions == targets).sum().item()
                 total_predictions += targets.size(0)
 
-                if (batch_idx + 1) % print_every == 0:
-                    avg_loss = total_loss / print_every
-                    accuracy = correct_predictions / total_predictions
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Batch [{batch_idx+1}/{len(train_loader)}], Avg. Loss: {avg_loss:.4f}, Accuracy: {accuracy:.4f}")
-                    wandb.log({"epoch": epoch, "batch": batch_idx, "train_loss": avg_loss, "train_accuracy": accuracy})
-                    total_loss = 0.0  # Reset total loss for next print interval
-                    correct_predictions = 0
-                    total_predictions = 0
-
+            accuracy = correct_predictions / total_predictions
+            avg_loss=total_loss / len(train_loader.dataset)       
+            print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
             train_losses.append(avg_loss)
             train_accuracies.append(accuracy)
 

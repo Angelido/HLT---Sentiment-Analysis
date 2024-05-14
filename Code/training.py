@@ -27,22 +27,22 @@ MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=40
+EPOCHS=20
 
 #Start a new wandb run to track this script
-wandb.init(
-    #Set the wandb project where this run will be logged
-    project="test",
+# wandb.init(
+#     #Set the wandb project where this run will be logged
+#     project="test",
 
-    # track hyperparameters and run metadata
-    config={
-    "max_len": 512,
-    "train_batch_size": 4,
-    "valid_batch_size": 4,
-    "learning_rate": 1e-05,
-    "epochs": 20
-    }
-)
+#     # track hyperparameters and run metadata
+#     config={
+#     "max_len": 512,
+#     "train_batch_size": 4,
+#     "valid_batch_size": 4,
+#     "learning_rate": 1e-05,
+#     "epochs": 20,
+#     }
+# )
 
 #Load the dataset
 df = pd.read_csv("Final_Datasets/Dataset_1_test.csv")
@@ -102,67 +102,73 @@ model.to(device)
 #Define the optimizer for the model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
-train_loss=[]
-tr_results = defaultdict(list)
+train_loss, train_accuracy=model.train_model(training_loader ,optimizer, device, EPOCHS)
+
+print(train_loss)
+print(train_accuracy)
+
+
+# train_loss=[]
+# tr_results = defaultdict(list)
 
 #Train loop
-for epoch in range(EPOCHS):
-    model.train()
-    total_loss=0.0
-    for data in training_loader:
-        ids = data['ids'].to(device, dtype = torch.long)
-        mask = data['mask'].to(device, dtype = torch.long)
-        token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
-        targets = data['targets'].to(device, dtype = torch.float)
-        targets = torch.unsqueeze(targets, dim=1)
+# for epoch in range(EPOCHS):
+#     model.train()
+#     total_loss=0.0
+#     for data in training_loader:
+#         ids = data['ids'].to(device, dtype = torch.long)
+#         mask = data['mask'].to(device, dtype = torch.long)
+#         token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
+#         targets = data['targets'].to(device, dtype = torch.float)
+#         targets = torch.unsqueeze(targets, dim=1)
         
-        outputs = model(ids, mask, token_type_ids)
+#         outputs = model(ids, mask, token_type_ids)
 
-        #optimizer.zero_grad()
-        loss = model.loss_fn(outputs, targets)
+#         #optimizer.zero_grad()
+#         loss = model.loss_fn(outputs, targets)
         
-        # Accumulate the total loss
-        total_loss += loss.item()
+#         # Accumulate the total loss
+#         total_loss += loss.item()
         
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+#         optimizer.zero_grad()
+#         loss.backward()
+#         optimizer.step()
 
-    #Calculate the average loss for the epoch
-    avg_loss = total_loss / len(training_loader)
-    train_loss.append(avg_loss)
+#     #Calculate the average loss for the epoch
+#     avg_loss = total_loss / len(training_loader)
+#     train_loss.append(avg_loss)
     
-    #Print the average loss for the epoch
-    print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
-    tr_results["epoch"]=epoch
-    tr_results["train_loss"]=avg_loss
-    wandb.log(tr_results)
+#     #Print the average loss for the epoch
+#     print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
+#     tr_results["epoch"]=epoch
+#     tr_results["train_loss"]=avg_loss
+#     # wandb.log(tr_results)
     
-def validation(epoch):
-    model.eval()
-    fin_targets=[]
-    fin_outputs=[]
-    with torch.no_grad():
-        for data in testing_loader:
-            ids = data['ids'].to(device, dtype = torch.long)
-            mask = data['mask'].to(device, dtype = torch.long)
-            token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
-            targets = data['targets'].to(device, dtype = torch.float)
-            targets = torch.unsqueeze(targets, dim=1)
-            outputs = model(ids, mask, token_type_ids)
-            fin_targets.extend(targets.cpu().detach().numpy().tolist())
-            fin_outputs.extend(outputs.cpu().detach().numpy().tolist())
-    return fin_outputs, fin_targets
+# def validation(epoch):
+#     model.eval()
+#     fin_targets=[]
+#     fin_outputs=[]
+#     with torch.no_grad():
+#         for data in testing_loader:
+#             ids = data['ids'].to(device, dtype = torch.long)
+#             mask = data['mask'].to(device, dtype = torch.long)
+#             token_type_ids = data['token_type_ids'].to(device, dtype = torch.long)
+#             targets = data['targets'].to(device, dtype = torch.float)
+#             targets = torch.unsqueeze(targets, dim=1)
+#             outputs = model(ids, mask, token_type_ids)
+#             fin_targets.extend(targets.cpu().detach().numpy().tolist())
+#             fin_outputs.extend(outputs.cpu().detach().numpy().tolist())
+#     return fin_outputs, fin_targets
 
-outputs, targets = validation(epoch)
-outputs = np.array(outputs) >= 0.5
-accuracy = metrics.accuracy_score(targets, outputs)
-f1_score_micro = metrics.f1_score(targets, outputs, average='micro')
-f1_score_macro = metrics.f1_score(targets, outputs, average='macro')
-print(f"Accuracy Score = {accuracy}")
-print(f"F1 Score (Micro) = {f1_score_micro}")
-print(f"F1 Score (Macro) = {f1_score_macro}")
+# outputs, targets = validation(EPOCHS)
+# outputs = np.array(outputs) >= 0.5
+# accuracy = metrics.accuracy_score(targets, outputs)
+# f1_score_micro = metrics.f1_score(targets, outputs, average='micro')
+# f1_score_macro = metrics.f1_score(targets, outputs, average='macro')
+# print(f"Accuracy Score = {accuracy}")
+# print(f"F1 Score (Micro) = {f1_score_micro}")
+# print(f"F1 Score (Macro) = {f1_score_macro}")
 
-print(targets, outputs)
-
+# print(targets, outputs)
 model.plot_loss(train_loss)
+model.plot_accuracy(train_accuracy)
