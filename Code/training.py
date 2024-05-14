@@ -27,7 +27,7 @@ MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=20
+EPOCHS=43
 
 #Start a new wandb run to track this script
 # wandb.init(
@@ -76,6 +76,7 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
 
 #Instantiate train and test datasets from Amazon class
 training_set = AmazonTitles_Dataset(train_data, tokenizer, MAX_LEN)
+validation_set=AmazonTitles_Dataset(val_data, tokenizer, MAX_LEN)
 testing_set = AmazonTitles_Dataset(test_data, tokenizer, MAX_LEN)
 
 # Configuration parameters for the DataLoader during train and test
@@ -92,6 +93,7 @@ test_params = {
 
 #DataLoader for train and test
 training_loader = DataLoader(training_set, **train_params)
+validation_loader = DataLoader(validation_set, **test_params)
 testing_loader = DataLoader(testing_set, **test_params)
 
 #Instantiate the model from the BertClass class
@@ -104,9 +106,11 @@ optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
 train_loss, train_accuracy=model.train_model(training_loader ,optimizer, device, EPOCHS)
 
-print(train_loss)
-print(train_accuracy)
+model.save_model("Saved_Models/bert_sentiment_model.pth")
 
+val_loss, val_accuracy=model.evaluate_model(validation_loader, device)
+
+print(val_loss, val_accuracy)
 
 # train_loss=[]
 # tr_results = defaultdict(list)

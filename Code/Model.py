@@ -115,8 +115,8 @@ class BertClass(torch.nn.Module):
         Returns:
             torch.Tensor: Model output.
         """
-        _, output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
-        output=self.classifier(output_1)
+        output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=True)
+        output=self.classifier(output_1["pooler_output"])
         return output
 
     def loss_fn(self, outputs, targets):
@@ -158,11 +158,19 @@ class BertClass(torch.nn.Module):
         train_losses = []
         train_accuracies = []
 
-        self.to(device)
-
         for epoch in range(num_epochs):
             
             self.train()
+            
+            # Freeze transformer parameters for the first 7 epochs
+            if epoch < (num_epochs-3):
+                for param in self.transformer.parameters():
+                    param.requires_grad = False
+            # Unfreeze transformer parameters for the last 3 epochs
+            else:
+                for param in self.transformer.parameters():
+                    param.requires_grad = True
+            
             total_loss = 0.0
             correct_predictions = 0
             total_predictions = 0
@@ -202,6 +210,57 @@ class BertClass(torch.nn.Module):
             train_accuracies.append(accuracy)
 
         return train_losses, train_accuracies
+    
+    def evaluate_model(self, val_loader, device):
+        """
+        Evaluates the model on the validation data.
+
+        Args:
+            val_loader (DataLoader): DataLoader for validation or test data.
+            device (torch.device): Device to run the model on (e.g., 'cpu' or 'cuda').
+
+        Returns:
+            float, float: Validation loss, validation accuracy.
+        """
+        
+        # Set the model to evaluation mode
+        self.eval()
+
+        # Initialize variables for loss and accuracy
+        val_loss = 0.0
+        correct_predictions = 0
+        total_predictions = 0
+
+        # Turn off gradient computation
+        with torch.no_grad():
+            for data in val_loader:
+                # Take inputs and targets
+                ids = data['ids'].to(device, dtype=torch.long)
+                mask = data['mask'].to(device, dtype=torch.long)
+                token_type_ids = data['token_type_ids'].to(device, dtype=torch.long)
+                targets = data['targets'].to(device, dtype=torch.float)
+                targets = torch.unsqueeze(targets, dim=1)
+
+                # Make predictions for this batch
+                outputs = self(ids, mask, token_type_ids)
+
+                # Compute loss
+                loss = self.loss_fn(outputs, targets)
+
+                # Accumulate validation loss
+                val_loss += loss.item()
+
+                # Compute accuracies
+                predictions = (outputs > 0.5).float()
+                correct_predictions += (predictions == targets).sum().item()
+                total_predictions += targets.size(0)
+
+        # Calculate validation accuracy and loss
+        val_accuracy = correct_predictions / total_predictions
+        avg_val_loss = val_loss / len(val_loader.dataset)
+
+        return avg_val_loss, val_accuracy
+
     
     def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
         """
