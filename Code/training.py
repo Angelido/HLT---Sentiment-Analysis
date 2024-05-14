@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
-from sklearn import metrics
-from sklearn.model_selection import train_test_split
-from collections import defaultdict
 import wandb
 
 import torch
 import torch.nn 
 import torch.optim 
 from torch.utils.data import DataLoader
+
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
 
 import transformers
 from transformers import BertTokenizer
