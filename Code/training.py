@@ -4,15 +4,14 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from collections import defaultdict
 import wandb
-import os
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+import torch.nn 
+import torch.optim 
+from torch.utils.data import DataLoader
 
 import transformers
-from transformers import BertTokenizer, BertModel, BertConfig
+from transformers import BertTokenizer
 
 from Model import BertClass, AmazonTitles_Dataset
 
@@ -27,7 +26,7 @@ MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=43
+EPOCHS=10
 
 #Start a new wandb run to track this script
 # wandb.init(
@@ -108,9 +107,14 @@ train_loss, train_accuracy=model.train_model(training_loader ,optimizer, device,
 
 model.save_model("Saved_Models/bert_sentiment_model.pth")
 
+#emb=model.extract_pooler_output(training_loader, device)
+
 val_loss, val_accuracy=model.evaluate_model(validation_loader, device)
 
 print(val_loss, val_accuracy)
+
+model.plot_loss(train_loss)
+model.plot_accuracy(train_accuracy)
 
 # train_loss=[]
 # tr_results = defaultdict(list)
@@ -174,5 +178,3 @@ print(val_loss, val_accuracy)
 # print(f"F1 Score (Macro) = {f1_score_macro}")
 
 # print(targets, outputs)
-model.plot_loss(train_loss)
-model.plot_accuracy(train_accuracy)

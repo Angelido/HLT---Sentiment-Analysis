@@ -1,13 +1,13 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+import torch.nn 
+from torch.utils.data import Dataset
 
 import transformers
-from transformers import BertTokenizer, BertModel, BertConfig
 
 from matplotlib import pyplot as plt
 import wandb
+import pandas as pd
+import numpy as np
 
 
 
@@ -305,6 +305,54 @@ class BertClass(torch.nn.Module):
         plt.legend()
         plt.xticks(epochs[::print_every])
         plt.show()
+        
+
+
+    def extract_pooler_output(self, data_loader, device):
+            """
+            Extracts the values present in output1["pooler_output"] and saves them in a new pandas DataFrame.
+
+            Args:
+                data_loader (DataLoader): DataLoader for the data.
+                device (torch.device): Device to run the model on (e.g., 'cpu' or 'cuda').
+
+            Returns:
+                pandas.DataFrame: DataFrame containing the extracted values from output1["pooler_output"].
+            """
+            # Set the model to evaluation mode
+            self.eval()
+
+            # List to store the extracted values along with their indices
+            extracted_values = []
+
+            # Turn off gradient computation
+            with torch.no_grad():
+                for idx, data in enumerate(data_loader):
+                    # Take inputs
+                    ids = data['ids'].to(device, dtype=torch.long)
+                    mask = data['mask'].to(device, dtype=torch.long)
+                    token_type_ids = data['token_type_ids'].to(device, dtype=torch.long)
+
+                    # Compute pooler output
+                    output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=True)
+                    pooler_output = output_1["pooler_output"]
+                    
+                    # Convert pooler_output tensor to numpy array
+                    pooler_output_np = pooler_output.cpu().numpy()
+    
+                    # Reshape pooler_output_np to have one row per sample in the batch
+                    num_samples = pooler_output_np.shape[0]
+                    pooler_output_np_reshaped = pooler_output_np.reshape(num_samples, -1)
+
+                    # Add the pooler output values along with their indices to the list
+                    for i in range(num_samples):
+                        extracted_values.append({"index": idx * data_loader.batch_size + i, **{f"pooler_output_{j}": val for j, val in enumerate(pooler_output_np_reshaped[i])}})
+
+            # Convert the list of extracted values into a pandas DataFrame
+            df = pd.DataFrame(extracted_values)
+
+            return df
+
 
 
 
