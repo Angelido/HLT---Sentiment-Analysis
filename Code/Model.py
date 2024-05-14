@@ -91,18 +91,18 @@ class BertClass(torch.nn.Module):
         """
         super(BertClass, self).__init__()
         self.transformer = transformers.BertModel.from_pretrained('bert-base-cased')
-        self.batch1 = torch.nn.BatchNorm1d(768)  # Batch normalization layer
-        #self.drop1 = torch.nn.Dropout(dropout)  # Dropout layer
-        self.l1 = torch.nn.Linear(768, 300)  # First linear layer
-        self.act1 = torch.nn.ReLU()  # ReLU activation function
-        #self.batch2 = torch.nn.BatchNorm1d(300)  # Batch normalization layer
-        self.drop2 = torch.nn.Dropout(dropout)  # Dropout layer
-        self.l2 = torch.nn.Linear(300, 100)  # Second linear layer
-        self.act2 = torch.nn.ReLU()  # ReLU activation function
-        #self.batch3 = torch.nn.BatchNorm1d(100)  # Batch normalization layer
-        self.drop3 = torch.nn.Dropout(dropout)  # Dropout layer
-        self.l3 = torch.nn.Linear(100, 1)  # Output linear layer
-        self.output=torch.nn.Sigmoid()
+        self.classifier=torch.nn.Sequential(
+            torch.nn.BatchNorm1d(768),
+            torch.nn.Linear(768, 300),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(dropout),
+            torch.nn.Linear(300, 100),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(dropout),
+            torch.nn.Linear(100, 1),
+            torch.nn.Sigmoid()
+        )
+        
 
     def forward(self, ids, mask, token_type_ids):
         """
@@ -117,12 +117,7 @@ class BertClass(torch.nn.Module):
             torch.Tensor: Model output.
         """
         _, output_1 = self.transformer(ids, attention_mask=mask, token_type_ids=token_type_ids, return_dict=False)
-        output_2 = self.batch1(output_1)
-        output_3 = self.drop2(self.act1(self.l1(output_2)))
-        output_4 = self.drop3(self.act2(self.l2(output_3)))
-        #output = self.l3(output_4)
-        output=self.output(self.l3(output_4))
-
+        output=self.classifier(output_1)
         return output
 
     def loss_fn(self, outputs, targets):

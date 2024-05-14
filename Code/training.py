@@ -27,7 +27,7 @@ MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=20
+EPOCHS=40
 
 #Start a new wandb run to track this script
 wandb.init(
@@ -45,7 +45,7 @@ wandb.init(
 )
 
 #Load the dataset
-df = pd.read_csv("../Final_Datasets/Dataset_1_test.csv")
+df = pd.read_csv("Final_Datasets/Dataset_1_test.csv")
 #Adjust the labels
 df.polarity=df.polarity-1
 
