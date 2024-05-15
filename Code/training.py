@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import wandb
+import os
 
 import torch
 import torch.nn 
@@ -25,7 +26,7 @@ EPOCHS=10
 #Start a new wandb run to track this script
 wandb.init(
     #Set the wandb project where this run will be logged
-    project="test",
+    project="new_test",
 
     # track hyperparameters and run metadata
     config={
