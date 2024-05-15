@@ -103,16 +103,12 @@ model.to(device)
 #Define the optimizer for the model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
-train_loss, train_accuracy=model.train_model(training_loader ,optimizer, device, EPOCHS)
+train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS)
 
 model.save_model("Saved_Models/bert_sentiment_model.pth")
 
 #emb=model.extract_pooler_output(training_loader, device)
 
-val_loss, val_accuracy=model.evaluate_model(validation_loader, device)
-
-print(val_loss, val_accuracy)
-
-model.plot_loss(train_loss)
-model.plot_accuracy(train_accuracy)
+model.plot_loss(train_loss, val_loss)
+model.plot_accuracy(train_accuracy, val_accuracy)
 
