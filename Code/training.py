@@ -15,12 +15,6 @@ from transformers import BertTokenizer
 
 from Model import BertClass, AmazonTitles_Dataset
 
-#Setting up the device for GPU usage
-device = torch.device("cuda" if torch.cuda.is_available() 
-                      else  "mps" if torch.backends.mps.is_available()
-                      else "cpu"
-                      )
-
 #Set hyperparmeters
 MAX_LEN=512
 TRAIN_BATCH_SIZE=4
@@ -43,8 +37,22 @@ wandb.init(
     }
 )
 
+#Setting up the device for GPU usage
+device = torch.device("cuda" if torch.cuda.is_available() 
+                      else  "mps" if torch.backends.mps.is_available()
+                      else "cpu"
+                      )
+
+# Get the absolute path of the current script file
+script_path = os.path.abspath(__file__)
+# Get the directory path containing the script file
+script_directory = os.path.dirname(script_path)
+folder_name = "Final_Datasets/Dataset_1_test.csv"
+# Create the complete path using os.path.join() and os.pardir to "go back" one folder
+folder_path = os.path.join(script_directory, os.pardir, folder_name)
+
 #Load the dataset
-df = pd.read_csv("Final_Datasets/Dataset_1_test.csv")
+df = pd.read_csv(folder_name)
 #Adjust the labels
 df.polarity=df.polarity-1
 
@@ -105,7 +113,11 @@ optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS)
 
-model.save_model("Saved_Models/bert_sentiment_model.pth")
+# Specify the name for saving the model
+save_name = "Save_Model/bert_sentiment_model.pth"
+save_path = os.path.join(script_directory, os.pardir, save_name)
+# Save the model to the specified path
+model.save_model(save_path)
 
 #emb=model.extract_pooler_output(training_loader, device)
 
