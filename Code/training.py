@@ -21,7 +21,7 @@ MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=10
+EPOCHS=20
 
 #Start a new wandb run to track this script
 wandb.init(
@@ -60,8 +60,8 @@ df.polarity=df.polarity-1
 #Take a subset of data
 num_polarity_1 = (df['polarity'] == 0).sum()
 num_polarity_2 = (df['polarity'] == 2).sum()
-sample_polarity_1 = df[df['polarity'] == 0].sample(n=10)
-sample_polarity_2 = df[df['polarity'] == 1].sample(n=10)
+sample_polarity_1 = df[df['polarity'] == 0].sample(n=30)
+sample_polarity_2 = df[df['polarity'] == 1].sample(n=30)
 df = pd.concat([sample_polarity_1, sample_polarity_2])
 df = df.reset_index(drop=True)
 
@@ -124,4 +124,10 @@ model.save_model(save_path)
 
 model.plot_loss(train_loss, val_loss)
 model.plot_accuracy(train_accuracy, val_accuracy)
+
+test_loss, test_accuracy=model.test_model(testing_loader, device)
+
+print(test_loss)
+print(test_accuracy)
+
 

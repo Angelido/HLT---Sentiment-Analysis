@@ -207,7 +207,7 @@ class BertClass(torch.nn.Module):
                 total_train_predictions += targets.size(0)
 
             train_accuracy = correct_train_predictions / total_train_predictions
-            avg_train_loss = total_train_loss / len(train_loader.dataset)
+            avg_train_loss = total_train_loss / len(train_loader)
             
             # Validation phase
             self.eval()
@@ -235,7 +235,7 @@ class BertClass(torch.nn.Module):
                     total_val_predictions += targets.size(0)
 
             val_accuracy = correct_val_predictions / total_val_predictions
-            avg_val_loss = total_val_loss / len(val_loader.dataset)
+            avg_val_loss = total_val_loss / len(val_loader)
 
             # Print training and validation metrics
             print(f'Epoch: {epoch}, Train Loss: {avg_train_loss}, Train Accuracy: {train_accuracy}')
@@ -261,7 +261,7 @@ class BertClass(torch.nn.Module):
         return train_losses, train_accuracies, val_losses, val_accuracies
 
     
-    def test_model(self, val_loader, device):
+    def test_model(self, test_loader, device):
         """
         Evaluates the model on the validation data.
 
@@ -277,13 +277,13 @@ class BertClass(torch.nn.Module):
         self.eval()
 
         # Initialize variables for loss and accuracy
-        val_loss = 0.0
+        test_loss = 0.0
         correct_predictions = 0
         total_predictions = 0
 
         # Turn off gradient computation
         with torch.no_grad():
-            for data in val_loader:
+            for data in test_loader:
                 # Take inputs and targets
                 ids = data['ids'].to(device, dtype=torch.long)
                 mask = data['mask'].to(device, dtype=torch.long)
@@ -298,7 +298,7 @@ class BertClass(torch.nn.Module):
                 loss = self.loss_fn(outputs, targets)
 
                 # Accumulate validation loss
-                val_loss += loss.item()
+                test_loss += loss.item()
 
                 # Compute accuracies
                 predictions = (outputs > 0.5).float()
@@ -306,10 +306,10 @@ class BertClass(torch.nn.Module):
                 total_predictions += targets.size(0)
 
         # Calculate validation accuracy and loss
-        val_accuracy = correct_predictions / total_predictions
-        avg_val_loss = val_loss / len(val_loader.dataset)
+        test_accuracy = correct_predictions / total_predictions
+        avg_test_loss = test_loss / len(test_loader)
 
-        return avg_val_loss, val_accuracy
+        return avg_test_loss, test_accuracy
 
     
     def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
