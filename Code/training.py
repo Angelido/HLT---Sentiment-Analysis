@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import wandb
 import os
+from matplotlib import pyplot as plt
 
 import torch
 import torch.nn 
@@ -10,18 +11,20 @@ from torch.utils.data import DataLoader
 
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 import transformers
 from transformers import BertTokenizer
 
 from Model import BertClass, AmazonTitles_Dataset
+from Evaluation_Metrics import plot_c_matrix, report_scores
 
 #Set hyperparmeters
 MAX_LEN=512
 TRAIN_BATCH_SIZE=4
 VALID_BATCH_SIZE=4
 LEARNING_RATE=1e-05
-EPOCHS=20
+EPOCHS=10
 
 #Start a new wandb run to track this script
 wandb.init(
@@ -66,8 +69,8 @@ df = pd.concat([sample_polarity_1, sample_polarity_2])
 df = df.reset_index(drop=True)
 
 #Divide test train and validation set
-train_data, test_data = train_test_split(df, test_size=0.2, random_state=200)
-train_data, val_data = train_test_split(train_data, test_size=0.1, random_state=200)
+train_data, test_data = train_test_split(df, test_size=0.2, random_state=42, stratify=df['polarity'])
+train_data, val_data = train_test_split(train_data, test_size=0.1, random_state=42, stratify=train_data['polarity'])
 
 #Reindex the dataframes
 train_data = train_data.reset_index(drop=True)
@@ -125,9 +128,9 @@ model.save_model(save_path)
 model.plot_loss(train_loss, val_loss)
 model.plot_accuracy(train_accuracy, val_accuracy)
 
-test_loss, test_accuracy=model.test_model(testing_loader, device)
+test_loss, test_accuracy, all_predictions, all_targets=model.test_model(testing_loader, device)
 
-print(test_loss)
-print(test_accuracy)
+plot_c_matrix(all_targets, all_predictions, "our LLM classifier")
+report_scores(all_targets, all_predictions)
 
-
+print(all_predictions, all_targets)

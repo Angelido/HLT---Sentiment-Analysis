@@ -280,6 +280,8 @@ class BertClass(torch.nn.Module):
         test_loss = 0.0
         correct_predictions = 0
         total_predictions = 0
+        all_predictions = []
+        all_targets = []
 
         # Turn off gradient computation
         with torch.no_grad():
@@ -304,12 +306,16 @@ class BertClass(torch.nn.Module):
                 predictions = (outputs > 0.5).float()
                 correct_predictions += (predictions == targets).sum().item()
                 total_predictions += targets.size(0)
+                
+                # Store predictions and targets for confusion matrix
+                all_predictions.extend(predictions.cpu().numpy())
+                all_targets.extend(targets.cpu().numpy())
 
         # Calculate validation accuracy and loss
         test_accuracy = correct_predictions / total_predictions
         avg_test_loss = test_loss / len(test_loader)
 
-        return avg_test_loss, test_accuracy
+        return avg_test_loss, test_accuracy, all_predictions, all_targets
 
     
     def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
