@@ -67,6 +67,7 @@ testing_loader = DataLoader(testing_set, **test_params)
 
 # Instantiate the BERT model
 model = BertClass()
+model.to(device)
 
 # Define the path to the saved model
 save_name = "Save_Model/bert_sentiment_model_new_final.pth"
