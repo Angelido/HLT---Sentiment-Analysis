@@ -59,14 +59,16 @@ folder_path = os.path.join(script_directory, os.pardir, folder_name)
 df = pd.read_csv(folder_path)
 #Adjust the labels
 df.polarity=df.polarity-1
+df.drop(columns="text")
+df.dropna()
 
-#Take a subset of data
-num_polarity_0 = (df['polarity'] == 0).sum()
-num_polarity_1 = (df['polarity'] == 1).sum()
-sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
-sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
-df = pd.concat([sample_polarity_0, sample_polarity_1])
-df = df.reset_index(drop=True)
+## Use this code for take a subset of data
+# num_polarity_0 = (df['polarity'] == 0).sum()
+# num_polarity_1 = (df['polarity'] == 1).sum()
+# sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
+# sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
+# df = pd.concat([sample_polarity_0, sample_polarity_1])
+# df = df.reset_index(drop=True)
 
 #Divide test train and validation set
 train_data, test_data = train_test_split(df, test_size=0.2, random_state=42, stratify=df['polarity'])
@@ -76,7 +78,6 @@ train_data, val_data = train_test_split(train_data, test_size=0.1, random_state=
 train_data = train_data.reset_index(drop=True)
 test_data = test_data.reset_index(drop=True)
 val_data = val_data.reset_index(drop=True)
-
 
 print("Training set size:", len(train_data))
 print("Valutation set size:", len(val_data))
@@ -115,6 +116,7 @@ model.to(device)
 #Define the optimizer for the model parameters
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
+# Train the model
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS)
 
 # Specify the name for saving the model
@@ -123,15 +125,6 @@ save_path = os.path.join(script_directory, os.pardir, save_name)
 # Save the model to the specified path
 model.save_model(save_path)
 
-#emb=model.extract_pooler_output(training_loader, device)
-
+# Plot the training and validation loss and accuracy
 model.plot_loss(train_loss, val_loss)
 model.plot_accuracy(train_accuracy, val_accuracy)
-
-test_loss, test_accuracy, all_predictions, all_targets=model.test_model(testing_loader, device)
-
-plot_c_matrix(all_targets, all_predictions, "our LLM classifier")
-report_scores(all_targets, all_predictions)
-#plot_roc_curve(all_targets, all_predictions)
-
-print(all_predictions, all_targets)

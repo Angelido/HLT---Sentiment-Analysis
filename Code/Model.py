@@ -7,7 +7,7 @@ import transformers
 from matplotlib import pyplot as plt
 import wandb
 import pandas as pd
-import numpy as pd
+import numpy as np
 from collections import defaultdict
 
 
@@ -138,9 +138,9 @@ class BertClass(torch.nn.Module):
         return torch.nn.BCELoss()(outputs, targets)
         
         
-    def fit_model(self, train_loader, val_loader, optimizer, device, num_epochs):
+    def fit_model(self, train_loader, val_loader, optimizer, device, num_epochs, save=False):
         """
-        Train and Validation for the model using the specified data loaders, optimizer, and device.
+        Train and validate the model using the specified data loaders, optimizer, and device.
 
         Args:
             train_loader (DataLoader): DataLoader for training data.
@@ -148,6 +148,7 @@ class BertClass(torch.nn.Module):
             optimizer (torch.optim.Optimizer): Optimizer for updating model parameters.
             device (torch.device): Device to run the model on (e.g., 'cpu' or 'cuda').
             num_epochs (int): Number of epochs for training.
+            save (bool, optional): If True, save the model during training. Default is False.
 
         Returns:
             list, list, list, list: Training losses, training accuracies, validation losses, validation accuracies.
@@ -158,12 +159,13 @@ class BertClass(torch.nn.Module):
         val_losses = []
         val_accuracies = []
         
-        # Dict for wandb
+        # Dictionaries for storing results for WandB logging
         tr_results = defaultdict(list)
         val_results = defaultdict(list)
 
         for epoch in range(num_epochs):
             
+            # Set the model to training mode
             self.train()
             
             # Freeze transformer parameters for the first 7 epochs
@@ -207,7 +209,13 @@ class BertClass(torch.nn.Module):
                 train_predictions = (outputs > 0.5).float()
                 correct_train_predictions += (train_predictions == targets).sum().item()
                 total_train_predictions += targets.size(0)
-
+                
+                # Save the model if 'save' is True (for long training)
+                if save:
+                    save_path=("../Save_Model/bert_sentiment_model_new_final.pth")
+                    self.save_model(save_path)
+            
+            # Calculate average training loss and accuracy
             train_accuracy = correct_train_predictions / total_train_predictions
             avg_train_loss = total_train_loss / len(train_loader)
             
@@ -220,15 +228,18 @@ class BertClass(torch.nn.Module):
             
             with torch.no_grad():
                 for val_data in val_loader:
+                    # Take inputs and targets
                     ids = val_data['ids'].to(device, dtype=torch.long)
                     mask = val_data['mask'].to(device, dtype=torch.long)
                     token_type_ids = val_data['token_type_ids'].to(device, dtype=torch.long)
                     targets = val_data['targets'].to(device, dtype=torch.float)
                     targets = torch.unsqueeze(targets, dim=1)
 
+                    # Make predictions for this batch
                     val_outputs = self(ids, mask, token_type_ids)
+                    
+                    # Compute loss
                     val_loss = self.loss_fn(val_outputs, targets)
-
                     total_val_loss += val_loss.item()
 
                     # Compute accuracies
@@ -236,6 +247,7 @@ class BertClass(torch.nn.Module):
                     correct_val_predictions += (val_predictions == targets).sum().item()
                     total_val_predictions += targets.size(0)
 
+            # Calculate average validation loss and accuracy
             val_accuracy = correct_val_predictions / total_val_predictions
             avg_val_loss = total_val_loss / len(val_loader)
 
@@ -265,14 +277,14 @@ class BertClass(torch.nn.Module):
     
     def test_model(self, test_loader, device):
         """
-        Evaluates the model on the validation data.
+        Evaluates the model on the test data.
 
         Args:
-            val_loader (DataLoader): DataLoader for validation or test data.
+            test_loader (DataLoader): DataLoader for test data.
             device (torch.device): Device to run the model on (e.g., 'cpu' or 'cuda').
 
         Returns:
-            float, float: Validation loss, validation accuracy.
+            float, float, list, list: Test loss, test accuracy, all predictions, all targets., float: Validation loss, validation accuracy.
         """
         
         # Set the model to evaluation mode
@@ -284,6 +296,7 @@ class BertClass(torch.nn.Module):
         total_predictions = 0
         all_predictions = []
         all_targets = []
+        all_outputs=[]
 
         # Turn off gradient computation
         with torch.no_grad():
@@ -310,6 +323,7 @@ class BertClass(torch.nn.Module):
                 total_predictions += targets.size(0)
                 
                 # Store predictions and targets for confusion matrix
+                all_outputs.extend(outputs.cpu().numpy())
                 all_predictions.extend(predictions.cpu().numpy())
                 all_targets.extend(targets.cpu().numpy())
 
@@ -406,6 +420,7 @@ class BertClass(torch.nn.Module):
                     for i in range(num_samples):
                         extracted_values.append({"index": idx * data_loader.batch_size + i, **{f"pooler_output_{j}": val for j, val in enumerate(pooler_output_np_reshaped[i])}})
 
+            print(extracted_values)
             # Convert the list of extracted values into a pandas DataFrame
             df = pd.DataFrame(extracted_values)
 
