@@ -96,9 +96,11 @@ class BertClass(torch.nn.Module):
             torch.nn.BatchNorm1d(768),
             torch.nn.Linear(768, 300),
             torch.nn.ReLU(),
+            torch.nn.BatchNorm1d(300),
             torch.nn.Dropout(dropout),
             torch.nn.Linear(300, 100),
             torch.nn.ReLU(),
+            torch.nn.BatchNorm1d(100),
             torch.nn.Dropout(dropout),
             torch.nn.Linear(100, 1),
             torch.nn.Sigmoid()

@@ -17,7 +17,7 @@ import transformers
 from transformers import BertTokenizer
 
 from Model import BertClass, AmazonTitles_Dataset
-from Evaluation_Metrics import plot_c_matrix, report_scores
+from Evaluation_Metrics import plot_c_matrix, report_scores, plot_roc_curve
 
 #Set hyperparmeters
 MAX_LEN=512
@@ -37,7 +37,7 @@ wandb.init(
     "train_batch_size": 4,
     "valid_batch_size": 4,
     "learning_rate": 1e-05,
-    "epochs": 20,
+    "epochs": 10,
     }
 )
 
@@ -51,21 +51,21 @@ device = torch.device("cuda" if torch.cuda.is_available()
 script_path = os.path.abspath(__file__)
 # Get the directory path containing the script file
 script_directory = os.path.dirname(script_path)
-folder_name = "Final_Datasets/Dataset_1_test.csv"
+folder_name = "Final_Datasets/Dataset_1_train.csv"
 # Create the complete path using os.path.join() and os.pardir to "go back" one folder
 folder_path = os.path.join(script_directory, os.pardir, folder_name)
 
 #Load the dataset
-df = pd.read_csv(folder_name)
+df = pd.read_csv(folder_path)
 #Adjust the labels
 df.polarity=df.polarity-1
 
 #Take a subset of data
-num_polarity_1 = (df['polarity'] == 0).sum()
-num_polarity_2 = (df['polarity'] == 2).sum()
-sample_polarity_1 = df[df['polarity'] == 0].sample(n=30)
-sample_polarity_2 = df[df['polarity'] == 1].sample(n=30)
-df = pd.concat([sample_polarity_1, sample_polarity_2])
+num_polarity_0 = (df['polarity'] == 0).sum()
+num_polarity_1 = (df['polarity'] == 1).sum()
+sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
+sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
+df = pd.concat([sample_polarity_0, sample_polarity_1])
 df = df.reset_index(drop=True)
 
 #Divide test train and validation set
@@ -118,7 +118,7 @@ optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS)
 
 # Specify the name for saving the model
-save_name = "Save_Model/bert_sentiment_model.pth"
+save_name = "Save_Model/bert_sentiment_model_final.pth"
 save_path = os.path.join(script_directory, os.pardir, save_name)
 # Save the model to the specified path
 model.save_model(save_path)
@@ -132,5 +132,6 @@ test_loss, test_accuracy, all_predictions, all_targets=model.test_model(testing_
 
 plot_c_matrix(all_targets, all_predictions, "our LLM classifier")
 report_scores(all_targets, all_predictions)
+#plot_roc_curve(all_targets, all_predictions)
 
 print(all_predictions, all_targets)
