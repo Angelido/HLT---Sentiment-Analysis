@@ -117,7 +117,7 @@ model.to(device)
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
 # Train the model
-train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS)
+train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS, save=True)                                                                                                                                   
 
 # Specify the name for saving the model
 save_name = "Save_Model/bert_sentiment_model_final.pth"
