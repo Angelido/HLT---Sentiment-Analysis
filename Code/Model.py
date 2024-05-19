@@ -168,8 +168,8 @@ class BertClass(torch.nn.Module):
             # Set the model to training mode
             self.train()
             
-            # Freeze transformer parameters for the first 7 epochs
-            if epoch < (num_epochs-3):
+            # Freeze transformer parameters for the last 3 epochs
+            if epoch > (num_epochs-3):
                 for param in self.transformer.parameters():
                     param.requires_grad = False
             # Unfreeze transformer parameters for the last 3 epochs
