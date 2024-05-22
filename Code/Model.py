@@ -9,6 +9,7 @@ import wandb
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+import os
 
 
 
@@ -212,7 +213,14 @@ class BertClass(torch.nn.Module):
                 
                 # Save the model if 'save' is True (for long training)
                 if save:
-                    save_path=("../Save_Model/bert_sentiment_model_new_final.pth")
+                    # Get the absolute path of the current script file
+                    script_path = os.path.abspath(__file__)
+                    # Get the directory path containing the script file
+                    script_directory = os.path.dirname(script_path)
+                    save_name = "Save_Model/bert_sentiment_model_epoch.pth"
+                    # Create the complete path using os.path.join() and os.pardir to "go back" one folder
+                    save_path = os.path.join(script_directory, os.pardir, save_name)
+                    
                     self.save_model(save_path)
             
             # Calculate average training loss and accuracy
