@@ -8,31 +8,26 @@
 </br>
 </br>
 
-We believe that understanding whether a product review is positive or negative is useful for several reasons. Firstly, such a system can enhance user experience by providing insights and recommendations on the quality of the product in question. Additionally, businesses can also gain valuable insights from customer feedback, enabling them to make informed decisions to improve their products. Lastly, an NLP system for sentiment analysis can help companies manage their online reputation more effectively by promptly addressing negative feedback and fostering positive engagement with customers.
+We believe that understanding whether a product review is positive or negative, and why it is positive or negative, is useful for several reasons. Firstly, such a system can improve the user experience by providing insights and recommendations on the quality of the product in question. Furthermore, companies can gain valuable insights from customer feedback, enabling them to make informed decisions to improve their products. Finally, an NLP system for sentiment analysis can help companies manage their online reputation more effectively by addressing negative feedback early on and promoting positive engagement with customers.
 
-So the purpose of our project is to take as input product reviews collected from Amazon (we will discuss the dataset later) and be able to distinguish between positive and negative reviews.
+The aim of our project is therefore to take product reviews collected by Amazon as input and to carry out a twofold task 
+- to be able to distinguish between positive and negative reviews (Sentiment Analysis);
+- to understand why a negative review is negative (Topic Modeling).
 
-Our idea is to attempt binary classification using only the review titles as input, such as ”Great CD” or ”Batteries died within a year”. Clearly, titles are usually short and impactful phrases. Therefore, we believe that these may be sufficient to effectively operate our classifier. However, we plan to extend this idea by also attempting classification using the entire reviews as input. Using the entire reviews entails processing longer sentences and greater computational effort, but it also provides more information and potentially higher accuracy. At this point, our plan is to compare the results of these two classifiers using various metrics to determine which approach is more effective.
+Our idea is to attempt a binary classification using only the titles of the reviews as input, such as "Great CD" or "Batteries are dead within a year". It is clear that the titles are usually short and impactful sentences. Therefore, we believe that they may be sufficient to make our classifier work effectively. We then use the entire reviews instead of just the headlines, focusing only on the negative ones, to carry out the task of topic modelling. This way we hope to be able to tell when a negative review is related to technical problems with the product, related to content issues, related to delivery delays, or related to other problems.
 
-Update: We are including an additional potential task to implement. We have identified a second dataset that again would allow us to input product reviews from Amazon and classify them as positive or negative reviews. In this case, we could evaluate our algorithms on the two different datasets to assess their effectiveness.
-
-## Key Features:
-- Utilizes machine learning and natural language processing techniques.
+## Main features:
+- Uses machine learning and natural language processing techniques.
 - Trains a sentiment analysis model on a dataset of Amazon product reviews.
 - Classifies reviews as positive or negative based on their sentiment.
-- Provides insights into customer sentiment towards Amazon products.
+- Performs Topic Modelling to understand the causes of negative reviews.
 
 ## Technologies Used:
 - Python
 - PyTorch
 - Transformers library (for BERT model)
+- NLTK
 - Amazon product review dataset
-
-## Usage:
-1. Preprocess the Amazon product review dataset.
-2. Train the sentiment analysis model on the preprocessed dataset.
-3. Evaluate the model's performance using various metrics.
-4. Use the trained model to classify new product reviews as positive or negative.
 
 ## Contributors:
 - [Angelo Nardone](https://github.com/Angelido)
