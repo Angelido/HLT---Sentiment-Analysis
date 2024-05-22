@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import wandb
+import os
 from matplotlib import pyplot as plt
 
 import torch
@@ -16,7 +17,7 @@ import transformers
 from transformers import BertTokenizer
 
 from Model import BertClass, AmazonTitles_Dataset
-from Evaluation_Metrics import plot_c_matrix, report_scores, plot_roc_curve
+from Evaluation_Metrics import plot_c_matrix, report_scores
 
 #Set hyperparmeters
 MAX_LEN=512
@@ -45,8 +46,14 @@ device = torch.device("cuda" if torch.cuda.is_available()
                       else  "mps" if torch.backends.mps.is_available()
                       else "cpu"
                       )
-# Specify the path for load the dataset
-folder_name = "../Final_Datasets/Dataset_1_train.csv"
+
+# Get the absolute path of the current script file
+script_path = os.path.abspath(__file__)
+# Get the directory path containing the script file
+script_directory = os.path.dirname(script_path)
+folder_name = "Final_Dataset/Dataset_final.csv"
+# Create the complete path using os.path.join() and os.pardir to "go back" one folder
+folder_path = os.path.join(script_directory, os.pardir, folder_name)
 
 #Load the dataset
 df = pd.read_csv(folder_path)
@@ -56,12 +63,12 @@ df.drop(columns="text")
 df.dropna()
 
 ## Use this code for take a subset of data
-# num_polarity_0 = (df['polarity'] == 0).sum()
-# num_polarity_1 = (df['polarity'] == 1).sum()
-# sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
-# sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
-# df = pd.concat([sample_polarity_0, sample_polarity_1])
-# df = df.reset_index(drop=True)
+num_polarity_0 = (df['polarity'] == 0).sum()
+num_polarity_1 = (df['polarity'] == 1).sum()
+sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
+sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
+df = pd.concat([sample_polarity_0, sample_polarity_1])
+df = df.reset_index(drop=True)
 
 #Divide test train and validation set
 train_data, test_data = train_test_split(df, test_size=0.2, random_state=42, stratify=df['polarity'])
@@ -113,7 +120,8 @@ optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS, save=True)                                                                                                                                   
 
 # Specify the name for saving the model
-save_path = "../Save_Model/bert_sentiment_model_final.pth"
+save_name = "Save_Model/bert_sentiment_model_final.pth"
+save_path = os.path.join(script_directory, os.pardir, save_name)
 # Save the model to the specified path
 model.save_model(save_path)
 
