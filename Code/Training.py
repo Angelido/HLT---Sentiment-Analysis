@@ -17,14 +17,14 @@ import transformers
 from transformers import BertTokenizer
 
 from Model import BertClass, AmazonTitles_Dataset
-from Evaluation_Metrics import plot_c_matrix, report_scores
+from Evaluation_Metrics import plot_c_matrix, report_scores, plot_accuracy, plot_loss
 
 #Set hyperparmeters
 MAX_LEN=512
-TRAIN_BATCH_SIZE=4
-VALID_BATCH_SIZE=4
+TRAIN_BATCH_SIZE=20
+VALID_BATCH_SIZE=16
 LEARNING_RATE=1e-05
-EPOCHS=10
+EPOCHS=5
 
 #Start a new wandb run to track this script
 wandb.init(
@@ -34,10 +34,10 @@ wandb.init(
     # track hyperparameters and run metadata
     config={
     "max_len": 512,
-    "train_batch_size": 4,
-    "valid_batch_size": 4,
+    "train_batch_size": 20,
+    "valid_batch_size": 16,
     "learning_rate": 1e-05,
-    "epochs": 10,
+    "epochs": 5,
     }
 )
 
@@ -63,12 +63,12 @@ df.drop(columns="text")
 df.dropna()
 
 ## Use this code for take a subset of data
-num_polarity_0 = (df['polarity'] == 0).sum()
-num_polarity_1 = (df['polarity'] == 1).sum()
-sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
-sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
-df = pd.concat([sample_polarity_0, sample_polarity_1])
-df = df.reset_index(drop=True)
+# num_polarity_0 = (df['polarity'] == 0).sum()
+# num_polarity_1 = (df['polarity'] == 1).sum()
+# sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
+# sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
+# df = pd.concat([sample_polarity_0, sample_polarity_1])
+# df = df.reset_index(drop=True)
 
 #Divide test train and validation set
 train_data, test_data = train_test_split(df, test_size=0.2, random_state=42, stratify=df['polarity'])
