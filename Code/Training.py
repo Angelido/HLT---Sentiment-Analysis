@@ -66,12 +66,12 @@ df.drop(columns="text")
 df.dropna()
 
 ## Use this code for take a subset of data
-num_polarity_0 = (df['polarity'] == 0).sum()
-num_polarity_1 = (df['polarity'] == 1).sum()
-sample_polarity_0 = df[df['polarity'] == 0].sample(n=10)
-sample_polarity_1 = df[df['polarity'] == 1].sample(n=10)
-df = pd.concat([sample_polarity_0, sample_polarity_1])
-df = df.reset_index(drop=True)
+# num_polarity_0 = (df['polarity'] == 0).sum()
+# num_polarity_1 = (df['polarity'] == 1).sum()
+# sample_polarity_0 = df[df['polarity'] == 0].sample(n=10)
+# sample_polarity_1 = df[df['polarity'] == 1].sample(n=10)
+# df = pd.concat([sample_polarity_0, sample_polarity_1])
+# df = df.reset_index(drop=True)
 
 #Divide test train and validation set
 train_data, test_data = train_test_split(df, test_size=0.2, random_state=42, stratify=df['polarity'])
