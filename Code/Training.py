@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import wandb
+#import wandb
 import os
 from matplotlib import pyplot as plt
 
@@ -25,24 +25,23 @@ TRAIN_BATCH_SIZE=20
 VALID_BATCH_SIZE=12
 LEARNING_RATE=1e-05
 EPOCHS=5
-WEIGHT_DECAY=0
 TEST=True
 
-#Start a new wandb run to track this script
-wandb.init(
-    #Set the wandb project where this run will be logged
-    project="new_test",
+# #Start a new wandb run to track this script
+# wandb.init(
+#     #Set the wandb project where this run will be logged
+#     project="new_test",
 
-    # track hyperparameters and run metadata
-    config={
-    "max_len": 512,
-    "train_batch_size": 20,
-    "valid_batch_size": 12,
-    "learning_rate": 1e-05,
-    "epochs": 5,
-    "weight_decay": 0
-    }
-)
+#     # track hyperparameters and run metadata
+#     config={
+#     "max_len": 512,
+#     "train_batch_size": 20,
+#     "valid_batch_size": 12,
+#     "learning_rate": 1e-05,
+#     "epochs": 5,
+#     "weight_decay": 0
+#     }
+# )
 
 #Setting up the device for GPU usage
 device = torch.device("cuda" if torch.cuda.is_available() 
@@ -66,12 +65,12 @@ df.drop(columns="text")
 df.dropna()
 
 ## Use this code for take a subset of data
-# num_polarity_0 = (df['polarity'] == 0).sum()
-# num_polarity_1 = (df['polarity'] == 1).sum()
-# sample_polarity_0 = df[df['polarity'] == 0].sample(n=30)
-# sample_polarity_1 = df[df['polarity'] == 1].sample(n=30)
-# df = pd.concat([sample_polarity_0, sample_polarity_1])
-# df = df.reset_index(drop=True)
+num_polarity_0 = (df['polarity'] == 0).sum()
+num_polarity_1 = (df['polarity'] == 1).sum()
+sample_polarity_0 = df[df['polarity'] == 0].sample(n=10)
+sample_polarity_1 = df[df['polarity'] == 1].sample(n=10)
+df = pd.concat([sample_polarity_0, sample_polarity_1])
+df = df.reset_index(drop=True)
 
 #Divide test train and validation set
 train_data, test_data = train_test_split(df, test_size=0.2, random_state=42, stratify=df['polarity'])
@@ -117,7 +116,7 @@ model = BertClass()
 model.to(device)
 
 #Define the optimizer for the model parameters
-optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
 # Train the model
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS, save=True)                                                                                                                                   
@@ -129,8 +128,8 @@ save_path = os.path.join(script_directory, os.pardir, save_name)
 model.save_model(save_path)
 
 # Plot the training and validation loss and accuracy
-model.plot_loss(train_loss, val_loss)
-model.plot_accuracy(train_accuracy, val_accuracy)
+plot_loss(train_loss, val_loss)
+plot_accuracy(train_accuracy, val_accuracy)
 
 # If test=True test the model
 if TEST:
