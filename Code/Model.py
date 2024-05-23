@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 import transformers
 
 from matplotlib import pyplot as plt
-import wandb
+#import wandb
 import pandas as pd
 import numpy as np
 from collections import defaultdict
@@ -269,16 +269,16 @@ class BertClass(torch.nn.Module):
             val_losses.append(avg_val_loss)
             val_accuracies.append(val_accuracy)
             
-            # Log metrics to WandB
-            tr_results["epoch"] = epoch
-            tr_results["train_loss"] = avg_train_loss
-            tr_results["train_accuracy"] = train_accuracy
-            wandb.log(tr_results)
+            # # Log metrics to WandB
+            # tr_results["epoch"] = epoch
+            # tr_results["train_loss"] = avg_train_loss
+            # tr_results["train_accuracy"] = train_accuracy
+            # wandb.log(tr_results)
             
-            val_results["epoch"] = epoch
-            val_results["val_loss"] = avg_val_loss
-            val_results["val_accuracy"] = val_accuracy
-            wandb.log(val_results)
+            # val_results["epoch"] = epoch
+            # val_results["val_loss"] = avg_val_loss
+            # val_results["val_accuracy"] = val_accuracy
+            # wandb.log(val_results)
 
         return train_losses, train_accuracies, val_losses, val_accuracies
 
@@ -340,52 +340,6 @@ class BertClass(torch.nn.Module):
         avg_test_loss = test_loss / len(test_loader)
 
         return avg_test_loss, test_accuracy, all_predictions, all_targets
-
-    
-    def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
-        """
-        Plot training and validation losses.
-
-        Args:
-            train_losses (list): List of training losses.
-            val_losses (list): List of validation losses (optional).
-            figsize (tuple): Size of the figure.
-            print_every (int): Interval for printing training progress.
-        """
-        epochs = range(1, len(train_losses) + 1)
-        plt.figure(figsize=figsize)
-        plt.plot(epochs, train_losses, label='Train Loss')
-        if val_losses:
-            plt.plot(epochs, val_losses, label='Val Loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.title('Training and Validation Losses')
-        plt.legend()
-        plt.xticks(epochs[::print_every])
-        plt.show()
-      
-        
-    def plot_accuracy(self, train_accuracies, val_accuracies=None, figsize=(8,6), print_every=1):
-        """
-        Plot training and validation accuracies.
-
-        Args:
-            train_accuracies (list): List of training accuracies.
-            figsize (tuple): Size of the figure.
-            val_accuracies (list): List of validation accuracies (optional).
-            print_every (int): Interval for printing training progress.
-        """
-        epochs = range(1, len(train_accuracies) + 1)
-        plt.figure(figsize=figsize)
-        plt.plot(epochs, train_accuracies, label='Train Accuracy')
-        if val_accuracies:
-            plt.plot(epochs, val_accuracies, label='Val Accuracy')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.title('Training and Validation Accuracies')
-        plt.legend()
-        plt.xticks(epochs[::print_every])
-        plt.show()
 
 
     def extract_pooler_output(self, data_loader, device):
