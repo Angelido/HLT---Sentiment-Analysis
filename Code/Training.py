@@ -26,6 +26,7 @@ VALID_BATCH_SIZE=12
 LEARNING_RATE=1e-05
 EPOCHS=5
 TEST=True
+WEIGHT_DECAY=0
 
 # #Start a new wandb run to track this script
 # wandb.init(
@@ -116,7 +117,7 @@ model = BertClass()
 model.to(device)
 
 #Define the optimizer for the model parameters
-optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
 # Train the model
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS, save=True)                                                                                                                                   
