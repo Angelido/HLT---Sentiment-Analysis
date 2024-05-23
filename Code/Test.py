@@ -11,7 +11,6 @@ from torch.utils.data import DataLoader
 
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 import transformers
 from transformers import BertTokenizer
@@ -21,7 +20,7 @@ from Evaluation_Metrics import plot_c_matrix, report_scores
 
 # Set hyperparameters
 MAX_LEN = 512
-VALID_BATCH_SIZE = 4
+VALID_BATCH_SIZE = 12
 
 # Setting up the device for GPU usage
 device = torch.device("cuda" if torch.cuda.is_available() 
@@ -33,7 +32,7 @@ device = torch.device("cuda" if torch.cuda.is_available()
 script_path = os.path.abspath(__file__)
 # Get the directory path containing the script file
 script_directory = os.path.dirname(script_path)
-folder_name = "Final_Datasets/Dataset_1_train.csv"
+folder_name = "Final_Dataset/Dataset_final.csv"
 # Create the complete path using os.path.join() and os.pardir to "go back" one folder
 folder_path = os.path.join(script_directory, os.pardir, folder_name)
 
@@ -70,7 +69,7 @@ model = BertClass()
 model.to(device)
 
 # Define the path to the saved model
-save_name = "Save_Model/bert_sentiment_model_new_final.pth"
+save_name = "Save_Model/bert_sentiment_model_final.pth"
 save_path = os.path.join(script_directory, os.pardir, save_name)
 
 # Load the model's state dict (parameters) from the saved file
@@ -81,3 +80,4 @@ test_loss, test_accuracy, all_predictions, all_targets = model.test_model(testin
 
 report_scores(all_targets, all_predictions)
 plot_c_matrix(all_targets, all_predictions, "our LLM classifier")
+plot_c_matrix(all_targets, all_predictions, "our LLM classifier", norm='true')
