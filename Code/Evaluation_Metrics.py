@@ -25,6 +25,10 @@ def plot_c_matrix(test_label, test_pred, classifier_name):
     
     disp.plot()
     plt.title('Confusion matrix of ' + classifier_name)
+    
+    # Save the matrix
+    plt.savefig("Confusion_matrix.png")
+    
     # Display the plot
     plt.show()
 
@@ -64,6 +68,10 @@ def plot_accuracy(train_accuracies, val_accuracies=None, figsize=(8,6), print_ev
     plt.title('Training and Validation Accuracies')
     plt.legend()
     plt.xticks(epochs[::print_every])
+    
+    # Save the figure
+    plt.savefig("Accuracy.png")
+    
     plt.show()
 
     
@@ -87,4 +95,8 @@ def plot_loss(train_losses, val_losses=None, figsize=(8,6), print_every=1):
     plt.title('Training and Validation Losses')
     plt.legend()
     plt.xticks(epochs[::print_every])
+    
+    # Save the figure
+    plt.savefig("Loss.png")
+    
     plt.show()
