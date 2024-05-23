@@ -132,6 +132,7 @@ model.save_model(save_path)
 model.plot_loss(train_loss, val_loss)
 model.plot_accuracy(train_accuracy, val_accuracy)
 
+# If test=True test the model
 if TEST:
 
     # Test the model on the test dataset
