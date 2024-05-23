@@ -22,9 +22,10 @@ from Evaluation_Metrics import plot_c_matrix, report_scores, plot_accuracy, plot
 #Set hyperparmeters
 MAX_LEN=512
 TRAIN_BATCH_SIZE=20
-VALID_BATCH_SIZE=16
+VALID_BATCH_SIZE=12
 LEARNING_RATE=1e-05
 EPOCHS=5
+WEIGHT_DECAY=0
 
 #Start a new wandb run to track this script
 wandb.init(
@@ -35,9 +36,10 @@ wandb.init(
     config={
     "max_len": 512,
     "train_batch_size": 20,
-    "valid_batch_size": 16,
+    "valid_batch_size": 12,
     "learning_rate": 1e-05,
     "epochs": 5,
+    "weight_decay": 0
     }
 )
 
@@ -114,7 +116,7 @@ model = BertClass()
 model.to(device)
 
 #Define the optimizer for the model parameters
-optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
 # Train the model
 train_loss, train_accuracy, val_loss, val_accuracy=model.fit_model(training_loader, validation_loader, optimizer, device, EPOCHS, save=True)                                                                                                                                   
