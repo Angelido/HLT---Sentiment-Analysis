@@ -26,6 +26,7 @@ VALID_BATCH_SIZE=12
 LEARNING_RATE=1e-05
 EPOCHS=5
 WEIGHT_DECAY=0
+TEST=True
 
 #Start a new wandb run to track this script
 wandb.init(
@@ -130,3 +131,12 @@ model.save_model(save_path)
 # Plot the training and validation loss and accuracy
 model.plot_loss(train_loss, val_loss)
 model.plot_accuracy(train_accuracy, val_accuracy)
+
+if TEST:
+
+    # Test the model on the test dataset
+    test_loss, test_accuracy, all_predictions, all_targets = model.test_model(testing_loader, device)
+
+    report_scores(all_targets, all_predictions)
+    plot_c_matrix(all_targets, all_predictions, "our LLM classifier")
+    plot_c_matrix(all_targets, all_predictions, "our LLM classifier", norm='true')
