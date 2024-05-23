@@ -7,7 +7,7 @@ import scikitplot as skplt
 from matplotlib import pyplot as plt
 
 
-def plot_c_matrix(test_label, test_pred, classifier_name):
+def plot_c_matrix(test_label, test_pred, classifier_name, norm=None):
     """
     Plots a confusion matrix for the given test labels and predictions.
     
@@ -20,7 +20,7 @@ def plot_c_matrix(test_label, test_pred, classifier_name):
         None
     """
     # Compute the confusion matrix and create a ConfusionMatrixDisplay object
-    cm = confusion_matrix(test_label, test_pred)
+    cm = confusion_matrix(test_label, test_pred, normalize=norm)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     
     disp.plot()
