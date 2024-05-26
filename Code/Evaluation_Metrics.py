@@ -15,6 +15,7 @@ def plot_c_matrix(test_label, test_pred, classifier_name, norm=None):
         test_label (array-like): True labels of the test data.
         test_pred (array-like): Predicted labels of the test data.
         classifier_name (str): Name of the classifier (used for the plot title).
+        norm (bool): if 'true', normalizes the confusion matrix.
     
     Returns:
         None
