@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-#import wandb
+import wandb
 import os
 from matplotlib import pyplot as plt
 
@@ -29,20 +29,20 @@ TEST=True
 WEIGHT_DECAY=0
 
 # #Start a new wandb run to track this script
-# wandb.init(
-#     #Set the wandb project where this run will be logged
-#     project="new_test",
+wandb.init(
+    #Set the wandb project where this run will be logged
+    project="new_test",
 
-#     # track hyperparameters and run metadata
-#     config={
-#     "max_len": 512,
-#     "train_batch_size": 20,
-#     "valid_batch_size": 12,
-#     "learning_rate": 1e-05,
-#     "epochs": 5,
-#     "weight_decay": 0
-#     }
-# )
+    # track hyperparameters and run metadata
+    config={
+    "max_len": 512,
+    "train_batch_size": 20,
+    "valid_batch_size": 12,
+    "learning_rate": 1e-05,
+    "epochs": 5,
+    "weight_decay": 0
+    }
+)
 
 #Setting up the device for GPU usage
 device = torch.device("cuda" if torch.cuda.is_available() 
