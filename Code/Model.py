@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 import transformers
 
 from matplotlib import pyplot as plt
-#import wandb
+import wandb
 import pandas as pd
 import numpy as np
 from collections import defaultdict
@@ -270,15 +270,15 @@ class BertClass(torch.nn.Module):
             val_accuracies.append(val_accuracy)
             
             # # Log metrics to WandB
-            # tr_results["epoch"] = epoch
-            # tr_results["train_loss"] = avg_train_loss
-            # tr_results["train_accuracy"] = train_accuracy
-            # wandb.log(tr_results)
+            tr_results["epoch"] = epoch
+            tr_results["train_loss"] = avg_train_loss
+            tr_results["train_accuracy"] = train_accuracy
+            wandb.log(tr_results)
             
-            # val_results["epoch"] = epoch
-            # val_results["val_loss"] = avg_val_loss
-            # val_results["val_accuracy"] = val_accuracy
-            # wandb.log(val_results)
+            val_results["epoch"] = epoch
+            val_results["val_loss"] = avg_val_loss
+            val_results["val_accuracy"] = val_accuracy
+            wandb.log(val_results)
 
         return train_losses, train_accuracies, val_losses, val_accuracies
 
